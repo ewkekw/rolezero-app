@@ -1,0 +1,49 @@
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200 # Fallback 
+
+spring:
+  application:
+    name: role0-core-api
+  
+  # Java 21 Virtual Threads para alta concorrência O(1)
+  threads:
+    virtual:
+      enabled: true
+
+  # Banco de Dados Geoespacial
+  datasource:
+    url: jdbc:postgresql://localhost:5432/role0db
+    username: role0user
+    password: role0password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 50
+  
+  jpa:
+    database-platform: org.hibernate.spatial.dialect.postgis.PostgisPG10Dialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  # Cache (Redis)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # Mensageria / EDA (RabbitMQ)
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+# Segurança Customizada
+app:
+  security:
+    jwt:
+      secret: "3f8e589A!2e5B876aD*74A4b1c2D3e4F5g6h7i8j9K0" # Apenas ambiente de mock local
+      expiration-ms: 86400000 # 24 horas

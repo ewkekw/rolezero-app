@@ -1,0 +1,20 @@
+package com.role0;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableAsync;
+
+@SpringBootApplication
+@EnableCaching
+@EnableAsync // Habilita processamento paralelo (combinado com Virtual Threads via property)
+@EnableJpaRepositories(basePackages = "com.role0.adapter.out.persistence.repository")
+public class Application {
+
+    public static void main(String[] args) {
+        // Skill: Data Engineer & DevSecOps - Inicialização limpa da JVM e do Contexto Spring
+        SpringApplication.run(Application.class, args);
+        System.out.println("🚀 ROLE-ZERO BANDEIRA PRETA. CORE API INICIADA COM SUCESSO. (Loom / PostGIS Ready)");
+    }
+}
