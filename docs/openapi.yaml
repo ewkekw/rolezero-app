@@ -1,0 +1,265 @@
+openapi: 3.0.3
+info:
+  title: Role0 Backend Core API
+  description: |-
+    A API pública que movimenta o app Role0.
+    A Vida Real Acontece Offline.
+  version: 1.0.0
+servers:
+  - url: https://api.role0.com/v1
+    description: Production Server
+  - url: http://localhost:8080/api/v1
+    description: Local Development
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        isNewUser:
+          type: boolean
+    SsoLoginRequest:
+      type: object
+      required:
+        - provider
+        - token
+      properties:
+        provider:
+          type: string
+          enum: [GOOGLE, APPLE]
+        token:
+          type: string
+          description: O token emitido pelo provedor OAuth no cliente móvel.
+          
+    EventoCardResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        hostName:
+          type: string
+        hostTrustScore:
+          type: number
+          format: float
+          example: 4.8
+        title:
+          type: string
+        distanceMeters:
+          type: integer
+          example: 1540
+        occupancy:
+          type: string
+          example: "3/5"
+          
+    CriarEventoRequest:
+      type: object
+      required:
+        - title
+        - capacity
+        - lat
+        - lng
+        - startsAt
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        capacity:
+          type: integer
+          minimum: 2
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+        startsAt:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/sso:
+    post:
+      summary: Login via SSO
+      description: Troca o token do Google/Apple por um JWT interno do Role0.
+      security: [] # Rota pública
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SsoLoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+              
+  /users/me/biometry:
+    post:
+      summary: Validar Identidade Biometrica
+      description: Envio de um selfie/vídeo (multipart) que é repassado sem salvamento (Zero-Knowledge) para validação do AWS Rekognition. Essencial para Ativar o perfil.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '202':
+          description: Em processamento.
+          
+  /users/me/vibes:
+    put:
+      summary: Atualizar Vibe Tags
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 5
+      responses:
+        '204':
+          description: Atualizado com sucesso
+
+  /events/nearby:
+    get:
+      summary: Buscar Rolês (O Mapa)
+      description: Varredura geográfica via PostGIS GIST index para eventos. Limitado rigorosamente via RateLimit por IP.
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: lng
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: radius_km
+          in: query
+          schema:
+            type: number
+            format: double
+            default: 10.0
+      responses:
+        '200':
+          description: Lista paginada de Cards
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EventoCardResponse'
+
+  /events:
+    post:
+      summary: Criar Evento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriarEventoRequest'
+      responses:
+        '201':
+          description: Evento criado
+          
+  /events/{eventId}/join-requests:
+    post:
+      summary: Solicitar Vaga (Convidado)
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Solicitação enviada
+
+  /events/{eventId}/requests/{requestId}:
+    put:
+      summary: Julgar Solicitação (Anfitrião)
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  enum: [APPROVE, REJECT]
+      responses:
+        '204':
+          description: Solicitante aprovado/rejeitado e notificado via Websocket.
+          
+  /events/{eventId}/check-in:
+    post:
+      summary: Realizar Check-in Geoespacial
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentLat:
+                  type: number
+                currentLng:
+                  type: number
+      responses:
+        '200':
+          description: Presença garantida.
+        '400':
+          description: "Você precisa se aproximar mais do local (fora do raio de 50 metros)."
