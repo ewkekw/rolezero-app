@@ -1,0 +1,24 @@
+# script de Infraestrutura como Código (IaC) para deploy automático na Render.com
+services:
+  - type: web
+    name: rolezero-backend-core
+    env: docker
+    region: ohio # ou oregon, frankfurt, singapore
+    plan: free # Custo Zero (512MB RAM)
+    dockerCommand: "" # Em branco pois o entrypoint já está no Dockerfile
+    
+    # As variáveis abaixo podem ser sobrescritas no painel da Render, 
+    # mas declaramos aqui o corpo básico obrigatório.
+    envVars:
+      # Definimos ativamente para rodar o "application-dev.yml" só para pegar 
+      # a string de mock do supabase, OU o devops setar 'prod' e injetar a string correta na AWS
+      - key: SPRING_PROFILES_ACTIVE
+        value: dev
+        
+      # Esta variável força a Render a injetar a Porta Web Externa que eles alocam dinamicamente pro contêiner
+      - key: SERVER_PORT
+        value: 8080
+      
+      # Força a máquina Java a economizar memória num ambiente contâinerizado free de 512mb
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC -Xss512k"

@@ -19,13 +19,17 @@ public class Evento {
     private StatusEvento status;
     private CoordenadaGeografica localizacao;
     private LocalDateTime horarioInicio;
-    
+    private boolean incidenteReportado;
+
     private final List<UUID> participantesAprovados;
 
-    public Evento(UUID id, UUID hostId, String titulo, int capacidadeMaxima, CoordenadaGeografica localizacao, LocalDateTime horarioInicio) {
-        if (id == null || hostId == null) throw new EventoDomainException("ID do evento e do host são obrigatórios");
-        if (capacidadeMaxima <= 1) throw new EventoDomainException("O evento precisa de pelo menos 2 vagas");
-        
+    public Evento(UUID id, UUID hostId, String titulo, int capacidadeMaxima, CoordenadaGeografica localizacao,
+            LocalDateTime horarioInicio) {
+        if (id == null || hostId == null)
+            throw new EventoDomainException("ID do evento e do host são obrigatórios");
+        if (capacidadeMaxima <= 1)
+            throw new EventoDomainException("O evento precisa de pelo menos 2 vagas");
+
         this.id = id;
         this.hostId = hostId;
         this.titulo = titulo;
@@ -33,6 +37,7 @@ public class Evento {
         this.localizacao = localizacao;
         this.horarioInicio = horarioInicio;
         this.status = StatusEvento.CRIADO;
+        this.incidenteReportado = false;
         this.participantesAprovados = new ArrayList<>();
     }
 
@@ -48,7 +53,7 @@ public class Evento {
             throw new EventoDomainException("Capacidade máxima do evento atingida.");
         }
         this.participantesAprovados.add(participanteId);
-        
+
         if (this.participantesAprovados.size() == this.capacidadeMaxima) {
             this.status = StatusEvento.FECHADO_PREGAME;
         }
@@ -61,27 +66,65 @@ public class Evento {
     }
 
     // Contingência de Cancelamento
-    // Regra: Se faltar < 2h para o inicio, e houver um participante mais confiável (promovidoInterinoId),
+    // Regra: Se faltar < 2h para o inicio, e houver um participante mais confiável
+    // (promovidoInterinoId),
     // o evento sobrevive trocando de dono. Se não, o evento morre.
     public void cancelarPeloHost(UUID requestHostId, UUID promovidoInterinoId) {
         if (!this.hostId.equals(requestHostId)) {
             throw new EventoDomainException("Apenas o host atual pode cancelar o evento");
         }
-        
+
         long horasParaInicio = ChronoUnit.HOURS.between(LocalDateTime.now(), this.horarioInicio);
-        
-        if (horasParaInicio < 2 && promovidoInterinoId != null && this.participantesAprovados.contains(promovidoInterinoId)) {
+
+        if (horasParaInicio < 2 && promovidoInterinoId != null
+                && this.participantesAprovados.contains(promovidoInterinoId)) {
             // Continência ativada: Salva a noite do grupo
             this.hostId = promovidoInterinoId;
-            this.participantesAprovados.remove(promovidoInterinoId); // Ele deixa de ser 'participante' para virar 'host'
+            this.participantesAprovados.remove(promovidoInterinoId); // Ele deixa de ser 'participante' para virar
+                                                                     // 'host'
         } else {
             // Cancela definitivamente
             this.status = StatusEvento.EXPIRADO;
         }
     }
 
-    public UUID getId() { return id; }
-    public UUID getHostId() { return hostId; }
-    public StatusEvento getStatus() { return status; }
-    public List<UUID> getParticipantesAprovados() { return Collections.unmodifiableList(participantesAprovados); }
+    public void reportarIncidente() {
+        this.incidenteReportado = true;
+    }
+
+    public boolean isIncidenteReportado() {
+        return incidenteReportado;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getHostId() {
+        return hostId;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public StatusEvento getStatus() {
+        return status;
+    }
+
+    public List<UUID> getParticipantesAprovados() {
+        return Collections.unmodifiableList(participantesAprovados);
+    }
+
+    public CoordenadaGeografica getLocalizacao() {
+        return localizacao;
+    }
+
+    public LocalDateTime getHorarioInicio() {
+        return horarioInicio;
+    }
+
+    public int getCapacidadeMaxima() {
+        return capacidadeMaxima;
+    }
 }

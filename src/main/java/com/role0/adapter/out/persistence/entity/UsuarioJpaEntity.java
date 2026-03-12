@@ -16,7 +16,7 @@ import jakarta.persistence.Table;
 import com.role0.core.domain.usuario.valueobject.VibeTag;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "role_usuario")
 public class UsuarioJpaEntity {
 
     @Id
@@ -35,18 +35,47 @@ public class UsuarioJpaEntity {
     @Column(name = "tag")
     private List<VibeTag> tags;
 
-    @Column(name = "identity_verified", nullable = false)
+    @Column(name = "biometria_validada", nullable = false)
     private boolean provedIdentityToken;
 
     // Getters / Setters omitted for brevity but they are necessary for Hibernate
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-    public List<VibeTag> getTags() { return tags; }
-    public void setTags(List<VibeTag> tags) { this.tags = tags; }
-    public boolean isProvedIdentityToken() { return provedIdentityToken; }
-    public void setProvedIdentityToken(boolean provedIdentityToken) { this.provedIdentityToken = provedIdentityToken; }
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public List<VibeTag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<VibeTag> tags) {
+        this.tags = tags;
+    }
+
+    public boolean isProvedIdentityToken() {
+        return provedIdentityToken;
+    }
+
+    public void setProvedIdentityToken(boolean provedIdentityToken) {
+        this.provedIdentityToken = provedIdentityToken;
+    }
 }

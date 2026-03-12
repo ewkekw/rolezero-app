@@ -9,3 +9,10 @@ target/
 .env
 .env.*
 !.env.example
+application-dev.yml
+
+# IDEs e Lixos de Compilação
+.vscode/
+TestPg.*
+apache-maven-*/
+server_run.log

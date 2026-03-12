@@ -32,11 +32,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception ex, WebRequest request) {
-        // Observability Loggers seriam despachados aqui para Elastic/Datadog.
+        ex.printStackTrace(); // Skill: Debugging - Ver log real
         ErrorDetails error = new ErrorDetails(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Erro interno fatal na Edge API Categoria Role0.",
+                "Erro interno fatal na Edge API Categoria Role0: " + ex.getMessage(),
                 request.getDescription(false)
         );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);

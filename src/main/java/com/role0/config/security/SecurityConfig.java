@@ -31,11 +31,13 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
-                    "/swagger-ui.html"
-                ).permitAll() // Libera Swagger UI Globalmente
-                .requestMatchers("/api/v1/auth/**").permitAll() // Onboarding/SSO Livre
-                .requestMatchers("/api/v1/events/nearby").permitAll() // Busca Pública com Rate Limiting
-                .anyRequest().authenticated()
+                    "/swagger-ui.html",
+                    "/swagger-resources/**",
+                    "/webjars/**"
+                ).permitAll() // Libera Swagger UI e OpenAPI Docs completamente
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/events/**").permitAll() // Rota Pública (Testes Frictionless)
+                .requestMatchers("/api/v1/auth/**").permitAll() // Rota de Onboarding e Login Livres
+                .anyRequest().authenticated() // Qualquer outra requisição, como POST /events, precisa de token
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

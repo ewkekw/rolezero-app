@@ -19,7 +19,7 @@ import jakarta.persistence.Table;
 import com.role0.core.domain.evento.valueobject.StatusEvento;
 
 @Entity
-@Table(name = "eventos")
+@Table(name = "role_evento")
 public class EventoJpaEntity {
 
     @Id
@@ -55,22 +55,75 @@ public class EventoJpaEntity {
     private boolean incidenteReportado = false;
 
     // Getters e Setters p/ Hibernate...
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
-    public String getTitulo() { return titulo; }
-    public void setTitulo(String titulo) { this.titulo = titulo; }
-    public UUID getHostId() { return hostId; }
-    public void setHostId(UUID hostId) { this.hostId = hostId; }
-    public int getCapacidadeMaxima() { return capacidadeMaxima; }
-    public void setCapacidadeMaxima(int capacidadeMaxima) { this.capacidadeMaxima = capacidadeMaxima; }
-    public StatusEvento getStatus() { return status; }
-    public void setStatus(StatusEvento status) { this.status = status; }
-    public LocalDateTime getHorarioInicio() { return horarioInicio; }
-    public void setHorarioInicio(LocalDateTime horarioInicio) { this.horarioInicio = horarioInicio; }
-    public Point getLocalizacao() { return localizacao; }
-    public void setLocalizacao(Point localizacao) { this.localizacao = localizacao; }
-    public List<UUID> getParticipantesAprovados() { return participantesAprovados; }
-    public void setParticipantesAprovados(List<UUID> participantesAprovados) { this.participantesAprovados = participantesAprovados; }
-    public boolean isIncidenteReportado() { return incidenteReportado; }
-    public void setIncidenteReportado(boolean incidenteReportado) { this.incidenteReportado = incidenteReportado; }
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitulo() {
+        return titulo;
+    }
+
+    public void setTitulo(String titulo) {
+        this.titulo = titulo;
+    }
+
+    public UUID getHostId() {
+        return hostId;
+    }
+
+    public void setHostId(UUID hostId) {
+        this.hostId = hostId;
+    }
+
+    public int getCapacidadeMaxima() {
+        return capacidadeMaxima;
+    }
+
+    public void setCapacidadeMaxima(int capacidadeMaxima) {
+        this.capacidadeMaxima = capacidadeMaxima;
+    }
+
+    public StatusEvento getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusEvento status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getHorarioInicio() {
+        return horarioInicio;
+    }
+
+    public void setHorarioInicio(LocalDateTime horarioInicio) {
+        this.horarioInicio = horarioInicio;
+    }
+
+    public Point getLocalizacao() {
+        return localizacao;
+    }
+
+    public void setLocalizacao(Point localizacao) {
+        this.localizacao = localizacao;
+    }
+
+    public List<UUID> getParticipantesAprovados() {
+        return participantesAprovados;
+    }
+
+    public void setParticipantesAprovados(List<UUID> participantesAprovados) {
+        this.participantesAprovados = participantesAprovados;
+    }
+
+    public boolean isIncidenteReportado() {
+        return incidenteReportado;
+    }
+
+    public void setIncidenteReportado(boolean incidenteReportado) {
+        this.incidenteReportado = incidenteReportado;
+    }
 }

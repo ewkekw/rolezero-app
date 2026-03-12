@@ -61,27 +61,25 @@ components:
     CriarEventoRequest:
       type: object
       required:
-        - title
-        - capacity
-        - lat
-        - lng
-        - startsAt
+        - titulo
+        - capacidadeMaxima
+        - latitude
+        - longitude
+        - horarioInicio
       properties:
-        title:
+        titulo:
           type: string
           maxLength: 100
-        description:
-          type: string
-        capacity:
+        capacidadeMaxima:
           type: integer
           minimum: 2
-        lat:
+        latitude:
           type: number
           format: double
-        lng:
+        longitude:
           type: number
           format: double
-        startsAt:
+        horarioInicio:
           type: string
           format: date-time
 
@@ -149,19 +147,19 @@ paths:
       summary: Buscar Rolês (O Mapa)
       description: Varredura geográfica via PostGIS GIST index para eventos. Limitado rigorosamente via RateLimit por IP.
       parameters:
-        - name: lat
+        - name: latitude
           in: query
           required: true
           schema:
             type: number
             format: double
-        - name: lng
+        - name: longitude
           in: query
           required: true
           schema:
             type: number
             format: double
-        - name: radius_km
+        - name: raioKm
           in: query
           schema:
             type: number
@@ -169,16 +167,13 @@ paths:
             default: 10.0
       responses:
         '200':
-          description: Lista paginada de Cards
+          description: Lista de Cards
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/EventoCardResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoCardResponse'
 
   /events:
     post:
@@ -229,10 +224,11 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - aprovada
               properties:
-                action:
-                  type: string
-                  enum: [APPROVE, REJECT]
+                aprovada:
+                  type: boolean
       responses:
         '204':
           description: Solicitante aprovado/rejeitado e notificado via Websocket.
@@ -253,10 +249,13 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - latitude
+                - longitude
               properties:
-                currentLat:
+                latitude:
                   type: number
-                currentLng:
+                longitude:
                   type: number
       responses:
         '200':

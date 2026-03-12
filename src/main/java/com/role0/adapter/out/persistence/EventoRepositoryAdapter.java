@@ -5,6 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.role0.core.domain.usuario.valueobject.VibeTag;
+import com.role0.core.domain.evento.valueobject.CoordenadaGeografica;
+
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -22,20 +25,20 @@ import com.role0.core.domain.evento.entity.Evento;
 public class EventoRepositoryAdapter implements EventoRepositoryPort {
 
     private final SpringDataEventoRepository repository;
-    private final PersistenceMapper mapper;
+    private final PersistenceMapper mapper = PersistenceMapper.INSTANCE;
     private final GeometryFactory geometryFactory;
 
-    public EventoRepositoryAdapter(SpringDataEventoRepository repository, PersistenceMapper mapper) {
+    public EventoRepositoryAdapter(SpringDataEventoRepository repository) {
         this.repository = repository;
-        this.mapper = mapper;
         this.geometryFactory = new GeometryFactory(new org.locationtech.jts.geom.PrecisionModel(), 4326);
     }
 
     @Override
     @CacheEvict(value = "eventosCache", allEntries = true)
-    public void salvar(Evento evento) {
+    public Evento salvar(Evento evento) {
         EventoJpaEntity entity = mapper.toJpaEntity(evento);
         repository.save(entity);
+        return evento;
     }
 
     @Override
@@ -44,20 +47,23 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
     }
 
     @Override
-    @Cacheable(value = "eventosCache", key = "#lat + '-' + #lon + '-' + #raioMetros")
-    public List<Evento> buscarEventosProximosAbertos(double lat, double lon, double raioMetros) {
-        Point pontoBuscador = geometryFactory.createPoint(new Coordinate(lon, lat));
-        
+    @Cacheable(value = "eventosCache", key = "#localizacao.latitude + '-' + #localizacao.longitude + '-' + #raioKm")
+    public List<Evento> buscarEventosProximos(CoordenadaGeografica localizacao, double raioKm,
+            List<VibeTag> tagsFilter) {
+        Point pontoBuscador = geometryFactory
+                .createPoint(new Coordinate(localizacao.getLongitude(), localizacao.getLatitude()));
+
         List<EventoJpaEntity> eventosProximos = repository.findNearbyEventos(
-            pontoBuscador, 
-            raioMetros, 
-            "ABERTO_PARA_VAGAS" // Omitindo a enumeração apenas pro mock JDBC literal
+                pontoBuscador,
+                raioKm * 1000,
+                "ABERTO_PARA_VAGAS" // Omitindo a enumeração apenas pro mock JDBC literal
         );
 
         return eventosProximos.stream()
-            .map(mapper::toDomain)
-            // Aqui, o Adapter também faria o cálculo da distância entre o Evento (A) o Usuário (B) 
-            // e injetaria no transient distance para retornar ao View Layer prontas
-            .collect(Collectors.toList());
+                .map(mapper::toDomain)
+                // Aqui, o Adapter também faria o cálculo da distância entre o Evento (A) o
+                // Usuário (B)
+                // e injetaria no transient distance para retornar ao View Layer prontas
+                .collect(Collectors.toList());
     }
 }

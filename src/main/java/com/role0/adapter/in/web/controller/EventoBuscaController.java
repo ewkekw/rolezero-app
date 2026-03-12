@@ -34,9 +34,9 @@ public class EventoBuscaController {
     // @RateLimiter(name = "apiRateLimiter", fallbackMethod = "rateLimiterFallback")
     // Descomentaremos acima quando a lib resilience4j-spring-boot3 for importada no framework.
     public ResponseEntity<List<EventoCardResponse>> buscarProximos(
-            @Parameter(description = "Latitude exata do usuário", required = true) @RequestParam double lat, 
-            @Parameter(description = "Longitude exata do usuário", required = true) @RequestParam double lon, 
-            @Parameter(description = "Raio de dispersão em Quilômetros (Default: 10km)", required = false) @RequestParam(defaultValue = "10.0") double raioKm) {
+            @Parameter(description = "Latitude exata do usuário", required = true) @RequestParam(name = "latitude") double latitude, 
+            @Parameter(description = "Longitude exata do usuário", required = true) @RequestParam(name = "longitude") double longitude, 
+            @Parameter(description = "Raio de dispersão em Quilômetros (Default: 10km)", required = false) @RequestParam(name = "raioKm", defaultValue = "10.0") double raioKm) {
         
         // Chamada à porta de entrada (Inbound Use Case) Delegada à Fase Application Core.
         // List<Evento> resultadosDomain = buscarEventosUseCase.executar(lat, lon, raioKm);
