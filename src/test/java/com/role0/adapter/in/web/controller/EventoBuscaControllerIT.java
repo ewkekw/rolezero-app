@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,11 +22,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.role0.adapter.out.external.weather.OpenWeatherClient;
+import com.role0.adapter.in.web.dto.response.MeuEventoResponse;
 import com.role0.config.security.JwtService;
 import com.role0.core.application.port.out.EventoRepositoryPort;
 import com.role0.core.application.port.out.UsuarioRepositoryPort;
+import com.role0.core.application.usecase.ListarMeusEventosUseCase;
 import com.role0.core.domain.evento.entity.Evento;
 import com.role0.core.domain.evento.valueobject.CoordenadaGeografica;
+import com.role0.core.domain.evento.valueobject.StatusEvento;
 import com.role0.core.application.port.out.WeatherServicePort.PrevisaoClima;
 import com.role0.core.domain.usuario.entity.Usuario;
 
@@ -49,13 +53,17 @@ class EventoBuscaControllerIT {
     @MockitoBean
     private OpenWeatherClient weatherClient;
 
+    @MockitoBean
+    private ListarMeusEventosUseCase listarMeusEventosUseCase;
+
     private UUID eventoId;
     private UUID hostId;
+    private UUID leitorId;
     private String userToken;
     private CoordenadaGeografica coords;
 
     @BeforeEach
-    void setup() {
+    public void setup() {
         hostId = UUID.randomUUID();
         Usuario host = new Usuario(hostId, "Host Test");
         usuarioRepository.salvar(host);
@@ -74,7 +82,7 @@ class EventoBuscaControllerIT {
         
         eventoRepository.salvar(evento);
 
-        UUID leitorId = UUID.randomUUID();
+        leitorId = UUID.randomUUID();
         userToken = jwtService.generateToken(leitorId);
     }
 
@@ -119,5 +127,21 @@ class EventoBuscaControllerIT {
                 .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    @DisplayName("Deve listar Meus Eventos")
+    void deveBuscarMeusEventos_Http200() throws Exception {
+        MeuEventoResponse mockResp = new MeuEventoResponse(
+                eventoId, "Meu Evento Teste", LocalDateTime.now(), StatusEvento.ABERTO_PARA_VAGAS, true);
+
+        Mockito.when(listarMeusEventosUseCase.executar(leitorId)).thenReturn(List.of(mockResp));
+
+        mockMvc.perform(get("/api/v1/events/my")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].titulo").value("Meu Evento Teste"))
+                .andExpect(jsonPath("$[0].host").value(true));
     }
 }

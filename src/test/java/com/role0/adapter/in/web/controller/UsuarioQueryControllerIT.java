@@ -18,7 +18,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.role0.adapter.in.web.dto.response.UsuarioPerfilResponse;
+import com.role0.adapter.in.web.dto.response.UsuarioPublicoResponse;
+import com.role0.core.application.usecase.BuscarPerfilPublicoUseCase;
 import com.role0.core.application.usecase.BuscarPerfilUsuarioUseCase;
+import com.role0.core.domain.usuario.exception.UsuarioNaoEncontradoException;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -29,6 +32,9 @@ class UsuarioQueryControllerIT {
 
     @MockitoBean
     private BuscarPerfilUsuarioUseCase buscarPerfilUsuarioUseCase;
+
+    @MockitoBean
+    private BuscarPerfilPublicoUseCase buscarPerfilPublicoUseCase;
 
     @Test
     @WithMockUser(username = "3fa85f64-5717-4562-b3fc-2c963f66afa6", roles = "USER")
@@ -51,5 +57,32 @@ class UsuarioQueryControllerIT {
     void deveProtegerRotaSemAuth() throws Exception {
         mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isUnauthorized()); // ou Forbidden dependendo da config
+    }
+
+    @Test
+    void deveBuscarPerfilPublicoCorretamente() throws Exception {
+        UUID queryId = UUID.randomUUID();
+
+        UsuarioPublicoResponse mockResp = new UsuarioPublicoResponse(
+                queryId, "Ciclano", List.of("ENERGICO"), true, new BigDecimal("4.8"), 15);
+
+        when(buscarPerfilPublicoUseCase.executar(queryId)).thenReturn(mockResp);
+
+        mockMvc.perform(get("/api/v1/users/" + queryId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nomeDisplay").value("Ciclano"))
+                .andExpect(jsonPath("$.trustScore").value(4.8))
+                .andExpect(jsonPath("$.qtdAvaliacoes").value(15))
+                .andExpect(jsonPath("$.email").doesNotExist());
+    }
+
+    @Test
+    void deveRetornar404QuandoPerfilPublicoNaoEncontrado() throws Exception {
+        UUID queryId = UUID.randomUUID();
+
+        when(buscarPerfilPublicoUseCase.executar(queryId)).thenThrow(new UsuarioNaoEncontradoException("Não encontrado"));
+
+        mockMvc.perform(get("/api/v1/users/" + queryId))
+                .andExpect(status().isNotFound()); // Depende do GlobalExceptionHandler retornar 404 para essa exceção
     }
 }

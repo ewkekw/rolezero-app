@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,8 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.role0.adapter.in.web.dto.request.JulgarSolicitacaoRequest;
+import com.role0.adapter.in.web.dto.response.ParticipanteResumoResponse;
+import com.role0.adapter.in.web.dto.response.SolicitacaoResumoResponse;
+import com.role0.core.application.usecase.ListarParticipantesEventoUseCase;
+import com.role0.core.application.usecase.ListarSolicitacoesEventoUseCase;
 import com.role0.core.application.usecase.ProcessarSolicitacaoUseCase;
 import com.role0.core.application.usecase.SolicitarParticipacaoUseCase;
+import java.util.List;
 
 import jakarta.validation.Valid;
 
@@ -31,12 +37,18 @@ public class SolicitacaoController {
 
     private final SolicitarParticipacaoUseCase solicitarParticipacaoUseCase;
     private final ProcessarSolicitacaoUseCase processarSolicitacaoUseCase;
+    private final ListarSolicitacoesEventoUseCase listarSolicitacoesUseCase;
+    private final ListarParticipantesEventoUseCase listarParticipantesUseCase;
 
     public SolicitacaoController(
             SolicitarParticipacaoUseCase solicitarParticipacaoUseCase,
-            ProcessarSolicitacaoUseCase processarSolicitacaoUseCase) {
+            ProcessarSolicitacaoUseCase processarSolicitacaoUseCase,
+            ListarSolicitacoesEventoUseCase listarSolicitacoesUseCase,
+            ListarParticipantesEventoUseCase listarParticipantesUseCase) {
         this.solicitarParticipacaoUseCase = solicitarParticipacaoUseCase;
         this.processarSolicitacaoUseCase = processarSolicitacaoUseCase;
+        this.listarSolicitacoesUseCase = listarSolicitacoesUseCase;
+        this.listarParticipantesUseCase = listarParticipantesUseCase;
     }
 
     @Operation(summary = "Guest: Pedir para Participar", description = "Adiciona o usuário numa Queue pendente a ser julgada pelo dono da festa (Host).")
@@ -65,5 +77,29 @@ public class SolicitacaoController {
         }
 
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Host: Listar Solicitações Pendentes", description = "Retorna a fila de solicitantes aguardando aprovação. Apenas o host pode acessar.")
+    @GetMapping("/{id}/requests")
+    public ResponseEntity<List<SolicitacaoResumoResponse>> listarSolicitacoesPendentes(
+            @Parameter(description = "UUID do Evento") @PathVariable UUID id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UUID hostId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(listarSolicitacoesUseCase.executar(id, hostId));
+    }
+
+    @Operation(summary = "Listar Participantes Aprovados", description = "Retorna a lista de participantes com suas vibes. Acessível ao host e participantes aprovados.")
+    @GetMapping("/{id}/participants")
+    public ResponseEntity<List<ParticipanteResumoResponse>> listarParticipantes(
+            @Parameter(description = "UUID do Evento") @PathVariable UUID id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(401).build();
+        }
+        UUID solicitanteId = UUID.fromString((String) authentication.getPrincipal());
+        return ResponseEntity.ok(listarParticipantesUseCase.executar(id, solicitanteId));
     }
 }

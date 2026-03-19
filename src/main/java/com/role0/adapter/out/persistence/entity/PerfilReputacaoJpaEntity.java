@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -13,7 +15,11 @@ import jakarta.persistence.Table;
 public class PerfilReputacaoJpaEntity {
 
     @Id
-    @Column(name = "usuario_id", updatable = false, nullable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
+
+    @Column(name = "usuario_id", nullable = false, unique = true)
     private UUID usuarioId;
 
     @Column(name = "trust_score", nullable = false)
@@ -32,6 +38,10 @@ public class PerfilReputacaoJpaEntity {
         this.totalAvaliacoes = totalAvaliacoes;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
     public UUID getUsuarioId() {
         return usuarioId;
     }
@@ -40,7 +50,15 @@ public class PerfilReputacaoJpaEntity {
         return currentScore;
     }
 
+    public void setCurrentScore(BigDecimal currentScore) {
+        this.currentScore = currentScore;
+    }
+
     public int getTotalAvaliacoes() {
         return totalAvaliacoes;
+    }
+
+    public void setTotalAvaliacoes(int totalAvaliacoes) {
+        this.totalAvaliacoes = totalAvaliacoes;
     }
 }

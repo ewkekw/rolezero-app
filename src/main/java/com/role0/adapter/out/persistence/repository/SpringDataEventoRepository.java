@@ -33,4 +33,12 @@ public interface SpringDataEventoRepository extends JpaRepository<EventoJpaEntit
 
     @Query(value = "SELECT count(*) FROM evento_participantes WHERE evento_id = :eventoId", nativeQuery = true)
     int countParticipantesAprovados(@Param("eventoId") UUID eventoId);
+
+    @Query("""
+            SELECT e FROM EventoJpaEntity e
+            WHERE (e.hostId = :usuarioId)
+               OR (:usuarioId MEMBER OF e.participantesAprovados)
+            ORDER BY e.horarioInicio DESC
+            """)
+    List<EventoJpaEntity> findMeusEventos(@Param("usuarioId") UUID usuarioId);
 }

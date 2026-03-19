@@ -19,6 +19,7 @@ public class JwtService {
         return token != null && token.startsWith("ey.");
     }
 
+    @org.springframework.lang.NonNull
     public String extractUserId(String token) {
         // Decriptaria a Claim subject
         return token.replace("ey.ROLEZERO.MOCKED.TOKEN.", "");

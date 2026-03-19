@@ -15,13 +15,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import com.role0.core.application.port.out.TokenBlacklistPort;
+
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final TokenBlacklistPort tokenBlacklistPort;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, TokenBlacklistPort tokenBlacklistPort) {
         this.jwtService = jwtService;
+        this.tokenBlacklistPort = tokenBlacklistPort;
     }
 
     @Override
@@ -43,6 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         if (jwtService.isTokenValid(jwt) && SecurityContextHolder.getContext().getAuthentication() == null) {
             
+            if (tokenBlacklistPort.isRevogado(jwt)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
             // Re-hidratando SecurityContext puramente por JWT. Stateless puro.
             String userId = jwtService.extractUserId(jwt);
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
