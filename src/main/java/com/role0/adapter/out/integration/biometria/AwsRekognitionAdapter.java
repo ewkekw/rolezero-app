@@ -6,6 +6,9 @@ import org.springframework.stereotype.Component;
 
 import com.role0.core.application.port.out.IdentityVerificationPort;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Adapter para integração com provedor de biometria (ex: AWS Rekognition
  * Liveness).
@@ -16,6 +19,8 @@ import com.role0.core.application.port.out.IdentityVerificationPort;
 @Component
 public class AwsRekognitionAdapter implements IdentityVerificationPort {
 
+    private static final Logger log = LoggerFactory.getLogger(AwsRekognitionAdapter.class);
+
     @Override
     public String extrairTokenBiometricoValido(byte[] imageBytes) {
         // Implementação AWS real omitida em favor da prova de arquitetura.
@@ -23,7 +28,7 @@ public class AwsRekognitionAdapter implements IdentityVerificationPort {
         // Liveness
         // e não detectar deepfakes injetadas na câmera, retorna 'true'.
 
-        System.out.println("LOG INTERNA: Liveness processado via AWS Rekognition na Edge.");
+        log.info("Liveness processado via AWS Rekognition na Edge.");
         return UUID.randomUUID().toString();
     }
 }

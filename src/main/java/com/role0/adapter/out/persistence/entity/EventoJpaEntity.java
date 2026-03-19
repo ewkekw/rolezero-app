@@ -54,6 +54,12 @@ public class EventoJpaEntity {
     @Column(name = "incidente_reportado", nullable = false)
     private boolean incidenteReportado = false;
 
+    @Column(columnDefinition = "TEXT")
+    private String descricao;
+
+    @Column(name = "endereco_legivel")
+    private String enderecoLegivel;
+
     // Getters e Setters p/ Hibernate...
     public UUID getId() {
         return id;
@@ -125,5 +131,21 @@ public class EventoJpaEntity {
 
     public void setIncidenteReportado(boolean incidenteReportado) {
         this.incidenteReportado = incidenteReportado;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getEnderecoLegivel() {
+        return enderecoLegivel;
+    }
+
+    public void setEnderecoLegivel(String enderecoLegivel) {
+        this.enderecoLegivel = enderecoLegivel;
     }
 }

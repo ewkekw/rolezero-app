@@ -25,11 +25,12 @@ import com.role0.core.domain.evento.entity.Evento;
 public class EventoRepositoryAdapter implements EventoRepositoryPort {
 
     private final SpringDataEventoRepository repository;
-    private final PersistenceMapper mapper = PersistenceMapper.INSTANCE;
+    private final PersistenceMapper mapper;
     private final GeometryFactory geometryFactory;
 
-    public EventoRepositoryAdapter(SpringDataEventoRepository repository) {
+    public EventoRepositoryAdapter(SpringDataEventoRepository repository, PersistenceMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
         this.geometryFactory = new GeometryFactory(new org.locationtech.jts.geom.PrecisionModel(), 4326);
     }
 
@@ -37,8 +38,8 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
     @CacheEvict(value = "eventosCache", allEntries = true)
     public Evento salvar(Evento evento) {
         EventoJpaEntity entity = mapper.toJpaEntity(evento);
-        repository.save(entity);
-        return evento;
+        EventoJpaEntity saved = repository.save(entity);
+        return mapper.toDomain(saved);
     }
 
     @Override
@@ -65,5 +66,10 @@ public class EventoRepositoryAdapter implements EventoRepositoryPort {
                 // Usuário (B)
                 // e injetaria no transient distance para retornar ao View Layer prontas
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int contarParticipantesAprovados(UUID eventoId) {
+        return repository.countParticipantesAprovados(eventoId);
     }
 }

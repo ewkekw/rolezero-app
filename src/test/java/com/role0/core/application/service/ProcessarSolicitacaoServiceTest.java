@@ -1,6 +1,7 @@
 package com.role0.core.application.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -23,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.role0.core.application.port.out.ChatNotificationPort;
 import com.role0.core.application.port.out.EventoRepositoryPort;
 import com.role0.core.application.port.out.MessageBrokerEventPort;
-import com.role0.core.application.port.out.UsuarioRepositoryPort;
 import com.role0.core.domain.evento.entity.Evento;
 import com.role0.core.domain.evento.exception.EventoDomainException;
 import com.role0.core.domain.evento.service.GatilhoSocialService;
@@ -35,9 +35,6 @@ class ProcessarSolicitacaoServiceTest {
 
     @Mock
     private EventoRepositoryPort eventoRepository;
-
-    @Mock
-    private UsuarioRepositoryPort usuarioRepository;
 
     @Mock
     private ChatNotificationPort chatNotification;
@@ -93,9 +90,10 @@ class ProcessarSolicitacaoServiceTest {
 
         UUID intrusoId = UUID.randomUUID();
 
-        assertThrows(EventoDomainException.class, () -> {
+        EventoDomainException exception = assertThrows(EventoDomainException.class, () -> {
             processarSolicitacaoService.aprovar(eventoId, intrusoId, participanteId);
         });
+        assertTrue(exception.getMessage().contains("Apenas o host"));
 
         verify(eventoRepository, never()).salvar(any());
         verify(chatNotification, never()).notificarNovoParticipante(any(), any());

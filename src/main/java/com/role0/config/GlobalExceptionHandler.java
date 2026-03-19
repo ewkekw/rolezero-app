@@ -11,6 +11,9 @@ import org.springframework.web.context.request.WebRequest;
 import com.role0.core.domain.evento.exception.EventoDomainException;
 import com.role0.core.domain.usuario.exception.UsuarioDomainException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Skill: Observability Engineer
  * Interceptador Global formatando Exceções Limpas do Domínio para Respostas Padrão RFC-7807 Problem Details.
@@ -18,6 +21,8 @@ import com.role0.core.domain.usuario.exception.UsuarioDomainException;
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler({EventoDomainException.class, UsuarioDomainException.class})
     public ResponseEntity<ErrorDetails> handleDomainException(RuntimeException ex, WebRequest request) {
@@ -32,7 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDetails> handleGlobalException(Exception ex, WebRequest request) {
-        ex.printStackTrace(); // Skill: Debugging - Ver log real
+        log.error("Erro interno fatal na Edge API Categoria Role0: ", ex);
         ErrorDetails error = new ErrorDetails(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),

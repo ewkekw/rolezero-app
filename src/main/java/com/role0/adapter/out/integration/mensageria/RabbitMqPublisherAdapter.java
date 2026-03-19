@@ -6,8 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.role0.core.application.port.out.MessageBrokerEventPort;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class RabbitMqPublisherAdapter implements MessageBrokerEventPort {
+
+    private static final Logger log = LoggerFactory.getLogger(RabbitMqPublisherAdapter.class);
 
     // private final RabbitTemplate rabbitTemplate; Omitido por hora
 
@@ -28,7 +33,6 @@ public class RabbitMqPublisherAdapter implements MessageBrokerEventPort {
         // return message;
         // });
 
-        System.out.println("EDA PIPELINE: Publicou evento " + eventoId + " com delay de " + horasDelay
-                + "h para exclusão na madrugada.");
+        log.info("EDA PIPELINE: Publicou evento {} com delay de {}h para exclusão na madrugada.", eventoId, horasDelay);
     }
 }

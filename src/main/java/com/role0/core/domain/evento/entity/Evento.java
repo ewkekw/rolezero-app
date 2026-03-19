@@ -19,6 +19,8 @@ public class Evento {
     private StatusEvento status;
     private CoordenadaGeografica localizacao;
     private LocalDateTime horarioInicio;
+    private String descricao;
+    private String enderecoLegivel;
     private boolean incidenteReportado;
 
     private final List<UUID> participantesAprovados;
@@ -59,6 +61,24 @@ public class Evento {
         }
     }
 
+    public void atualizarDetalhes(String titulo, String descricao, Integer maxCapacity, int totalAprovadosAtual) {
+        if (maxCapacity != null) {
+            if (maxCapacity < totalAprovadosAtual) {
+                throw new EventoDomainException("A nova capacidade máxima não pode ser menor que o número atual de aprovados.");
+            }
+            if (maxCapacity <= 1) {
+                throw new EventoDomainException("O evento precisa de pelo menos 2 vagas.");
+            }
+            this.capacidadeMaxima = maxCapacity;
+        }
+        if (titulo != null && !titulo.isBlank()) {
+            this.titulo = titulo;
+        }
+        if (descricao != null && !descricao.isBlank()) {
+            this.descricao = descricao;
+        }
+    }
+
     // Raio de 50 metros
     public boolean validarProximidadeCheckIn(CoordenadaGeografica userLocation) {
         double distMeters = this.localizacao.calcularDistanciaMetros(userLocation);
@@ -69,12 +89,12 @@ public class Evento {
     // Regra: Se faltar < 2h para o inicio, e houver um participante mais confiável
     // (promovidoInterinoId),
     // o evento sobrevive trocando de dono. Se não, o evento morre.
-    public void cancelarPeloHost(UUID requestHostId, UUID promovidoInterinoId) {
+    public void cancelarPeloHost(UUID requestHostId, UUID promovidoInterinoId, LocalDateTime agora) {
         if (!this.hostId.equals(requestHostId)) {
             throw new EventoDomainException("Apenas o host atual pode cancelar o evento");
         }
 
-        long horasParaInicio = ChronoUnit.HOURS.between(LocalDateTime.now(), this.horarioInicio);
+        long horasParaInicio = ChronoUnit.HOURS.between(agora, this.horarioInicio);
 
         if (horasParaInicio < 2 && promovidoInterinoId != null
                 && this.participantesAprovados.contains(promovidoInterinoId)) {
@@ -122,6 +142,22 @@ public class Evento {
 
     public LocalDateTime getHorarioInicio() {
         return horarioInicio;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public String getEnderecoLegivel() {
+        return enderecoLegivel;
+    }
+
+    public void setEnderecoLegivel(String enderecoLegivel) {
+        this.enderecoLegivel = enderecoLegivel;
     }
 
     public int getCapacidadeMaxima() {

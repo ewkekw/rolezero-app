@@ -17,13 +17,21 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.springframework.web.bind.annotation.PathVariable;
+import com.role0.core.application.usecase.BuscarEventoUseCase;
+import com.role0.core.application.dto.EventoDetalheOutput;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/events")
 @Tag(name = "2. Busca e Indexação Geográfica", description = "Radar de Eventos. Rate Limiting ativo por IP para prevenir Web Scraping.")
 public class EventoBuscaController {
 
-    // private final BuscarEventosProximosUseCase buscarEventosUseCase;
-    // private final WebMapper mapper;
+    private final BuscarEventoUseCase buscarEventoUseCase;
+
+    public EventoBuscaController(BuscarEventoUseCase buscarEventoUseCase) {
+        this.buscarEventoUseCase = buscarEventoUseCase;
+    }
 
     /**
      * Endpoint crítico para raspagem (Scraping). 
@@ -47,5 +55,12 @@ public class EventoBuscaController {
     public ResponseEntity<String> rateLimiterFallback(Exception e) {
         return ResponseEntity.status(429)
             .body("Too Many Requests: Detectamos excesso de requisições buscando eventos. Tente novamente em instantes.");
+    }
+
+    @Operation(summary = "Detalhes Ricos do Evento", description = "Recupera os detalhes completos do evento, incluindo contagem de vagas, informações do anfitrião e clima no local.")
+    @GetMapping("/{eventId}")
+    public ResponseEntity<EventoDetalheOutput> buscarDetalheEvento(
+            @Parameter(description = "ID do Evento em formato UUID", required = true) @PathVariable UUID eventId) {
+        return ResponseEntity.ok(buscarEventoUseCase.executar(eventId));
     }
 }

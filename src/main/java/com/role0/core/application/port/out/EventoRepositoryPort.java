@@ -11,4 +11,5 @@ public interface EventoRepositoryPort {
     Evento salvar(Evento evento);
     Optional<Evento> buscarPorId(UUID id);
     List<Evento> buscarEventosProximos(CoordenadaGeografica localizacao, double raioKm, List<VibeTag> tagsFilter);
+    int contarParticipantesAprovados(UUID eventoId);
 }

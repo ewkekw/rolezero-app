@@ -6,7 +6,7 @@ spring:
   datasource:
     # Usando o suporte automático do Testcontainers via driver tc
     # A imagem do postgis é essencial para funções como ST_DWithin
-    url: jdbc:tc:postgis/postgis:15-3.3-alpine:///test_rolezero
+    url: jdbc:tc:postgis:15-3.3-alpine:///test_rolezero
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     username: test
     password: test
@@ -17,7 +17,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.spatial.dialect.postgis.PostgisDialect
-        format_sql: true
+        format-sql: true
     show-sql: true
 
   flyway:

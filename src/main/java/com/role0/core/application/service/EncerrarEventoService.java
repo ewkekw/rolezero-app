@@ -8,6 +8,9 @@ import com.role0.core.domain.evento.entity.Evento;
 import com.role0.core.domain.evento.exception.EventoDomainException;
 import com.role0.core.domain.evento.valueobject.StatusEvento;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * ADR-002: Fluxo EDA (Event-Driven Architecture) para Expurgo de Informação
  *
@@ -19,6 +22,7 @@ import com.role0.core.domain.evento.valueobject.StatusEvento;
  */
 public class EncerrarEventoService implements EncerrarEventoUseCase {
 
+    private static final Logger log = LoggerFactory.getLogger(EncerrarEventoService.class);
     private final EventoRepositoryPort eventoRepository;
 
     public EncerrarEventoService(EventoRepositoryPort eventoRepository) {
@@ -33,6 +37,6 @@ public class EncerrarEventoService implements EncerrarEventoUseCase {
         evento.setStatus(StatusEvento.EXPIRADO);
         eventoRepository.salvar(evento);
         
-        System.out.println("LOG INTERNO: Ocorrência finalizada via EDA. Dados deletáveis de chat poderão ser fisicamente espurgados pelo consumer.");
+        log.info("Ocorrência finalizada via EDA. Dados deletáveis de chat poderão ser fisicamente espurgados pelo consumer.");
     }
 }

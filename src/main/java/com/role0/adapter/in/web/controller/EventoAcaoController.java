@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.role0.adapter.in.web.dto.request.CheckInRequest;
 import com.role0.adapter.in.web.dto.request.CriarEventoRequest;
 import com.role0.core.application.usecase.AcionarBotaoPanicoUseCase;
+import com.role0.core.application.usecase.AtualizarEventoUseCase;
+import com.role0.core.application.usecase.CancelarEventoUseCase;
 import com.role0.core.application.usecase.CriarEventoUseCase;
 import com.role0.core.application.usecase.RealizarCheckInUseCase;
 import com.role0.core.domain.evento.valueobject.CoordenadaGeografica;
@@ -41,14 +43,20 @@ public class EventoAcaoController {
     private final CriarEventoUseCase criarEventoUseCase;
     private final RealizarCheckInUseCase realizarCheckInUseCase;
     private final AcionarBotaoPanicoUseCase acionarBotaoPanicoUseCase;
+    private final AtualizarEventoUseCase atualizarEventoUseCase;
+    private final CancelarEventoUseCase cancelarEventoUseCase;
 
     public EventoAcaoController(
             CriarEventoUseCase criarEventoUseCase,
             RealizarCheckInUseCase realizarCheckInUseCase,
-            AcionarBotaoPanicoUseCase acionarBotaoPanicoUseCase) {
+            AcionarBotaoPanicoUseCase acionarBotaoPanicoUseCase,
+            AtualizarEventoUseCase atualizarEventoUseCase,
+            CancelarEventoUseCase cancelarEventoUseCase) {
         this.criarEventoUseCase = criarEventoUseCase;
         this.realizarCheckInUseCase = realizarCheckInUseCase;
         this.acionarBotaoPanicoUseCase = acionarBotaoPanicoUseCase;
+        this.atualizarEventoUseCase = atualizarEventoUseCase;
+        this.cancelarEventoUseCase = cancelarEventoUseCase;
     }
 
     @Operation(summary = "Criar Evento Novo", description = "Host cria um evento restrito. Necessita Bearer Token.")
@@ -103,5 +111,37 @@ public class EventoAcaoController {
         // A API responde de forma otimista/minimalista para não gerar latência ou erros
         // obvios diante do agressor
         return ResponseEntity.accepted().build();
+    }
+
+    @Operation(summary = "Editar Evento", description = "Host edita título, descrição e/ou capacidade do evento.")
+    @org.springframework.web.bind.annotation.PatchMapping("/{id}")
+    public ResponseEntity<Void> atualizarEvento(
+            @Parameter(description = "UUID do Evento", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6") @PathVariable UUID id,
+            @Valid @RequestBody com.role0.adapter.in.web.dto.request.AtualizarEventoRequest request) {
+        
+        String principal = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UUID userAutenticado = UUID.fromString(principal);
+
+        com.role0.core.application.dto.AtualizarEventoCommand command = new com.role0.core.application.dto.AtualizarEventoCommand(
+                request.titulo(),
+                request.descricao(),
+                request.maxCapacity()
+        );
+
+        atualizarEventoUseCase.executar(id, command, userAutenticado);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Cancelar Evento", description = "Host cancela o evento. Pode transferir a liderança (Interino) se faltar menos de 2h.")
+    @org.springframework.web.bind.annotation.DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelarEvento(
+            @Parameter(description = "UUID do Evento a ser cancelado", example = "3fa85f64-5717-4562-b3fc-2c963f66afa6") @PathVariable UUID id) {
+        String principal = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UUID hostIdAutenticado = UUID.fromString(principal);
+
+        cancelarEventoUseCase.executar(id, hostIdAutenticado);
+
+        return ResponseEntity.noContent().build();
     }
 }

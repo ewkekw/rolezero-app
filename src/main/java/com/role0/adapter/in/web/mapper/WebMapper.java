@@ -2,15 +2,12 @@ package com.role0.adapter.in.web.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
 import com.role0.adapter.in.web.dto.response.DetalheEventoResponse;
 import com.role0.core.domain.evento.entity.Evento;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface WebMapper {
-
-    WebMapper INSTANCE = Mappers.getMapper(WebMapper.class);
 
     @Mapping(target = "quantidadeAprovados", expression = "java(evento.getParticipantesAprovados().size())")
     @Mapping(target = "participantesIds", source = "participantesAprovados")

@@ -6,8 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.role0.core.application.port.out.ChatNotificationPort;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class WebSocketChatAdapter implements ChatNotificationPort {
+
+    private static final Logger log = LoggerFactory.getLogger(WebSocketChatAdapter.class);
 
     // private final SimpMessagingTemplate messagingTemplate; -- Omitindo auto-wired
     // temporário.
@@ -18,7 +23,7 @@ public class WebSocketChatAdapter implements ChatNotificationPort {
         String payload = "{\"type\": \"NEW_MEMBER\", \"memberId\": \"" + participanteId + "\"}";
 
         // messagingTemplate.convertAndSend(topic, payload);
-        System.out.println("STOMP WebSocket Broadcast: " + payload + " para " + topic);
+        log.info("STOMP WebSocket Broadcast: {} para {}", payload, topic);
     }
 
     @Override
@@ -27,7 +32,7 @@ public class WebSocketChatAdapter implements ChatNotificationPort {
         String payload = "{\"text\": \"" + iceBreakerMessage + "\"}";
 
         // messagingTemplate.convertAndSend(topic, payload);
-        System.out.println("STOMP WebSocket Broadcast: " + payload + " para " + topic);
+        log.info("STOMP WebSocket Broadcast: {} para {}", payload, topic);
     }
 
     @Override
@@ -37,6 +42,6 @@ public class WebSocketChatAdapter implements ChatNotificationPort {
         // isolada)
         // para abortar o TTL automático do chat e efetuar Dump Físico das mensagens num
         // S3 de retenção jurídica (WORM storage).
-        System.out.println("🚨 SEGURANÇA: COMANDO EXTERNO S3 FREEZE ACIONADO PARA A PARTY " + eventoId);
+        log.warn("🚨 SEGURANÇA: COMANDO EXTERNO S3 FREEZE ACIONADO PARA A PARTY {}", eventoId);
     }
 }

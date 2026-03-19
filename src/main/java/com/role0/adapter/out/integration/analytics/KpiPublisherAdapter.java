@@ -6,8 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.role0.core.application.port.out.KpiAnalyticsPort;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class KpiPublisherAdapter implements KpiAnalyticsPort {
+
+    private static final Logger log = LoggerFactory.getLogger(KpiPublisherAdapter.class);
 
     // private final KafkaTemplate kafkaTemplate; // Omitido p/ mock
 
@@ -17,7 +22,7 @@ public class KpiPublisherAdapter implements KpiAnalyticsPort {
             eventoId, checkIns, totalAprovados);
             
         // kafkaTemplate.send("analytics.kpi.comparecimento", kpiPayload);
-        System.out.println("📊 DATA ENGINEER [Kafka/Firehose]: Analytics passivo 'Taxa de Comparecimento' emitido p/ Lakehouse: " + kpiPayload);
+        log.info("📊 DATA ENGINEER [Kafka/Firehose]: Analytics passivo 'Taxa de Comparecimento' emitido p/ Lakehouse: {}", kpiPayload);
     }
 
     @Override
@@ -26,6 +31,6 @@ public class KpiPublisherAdapter implements KpiAnalyticsPort {
             usuarioId, totalEventosParticipados);
             
         // kafkaTemplate.send("analytics.kpi.recorrencia", kpiPayload);
-        System.out.println("📊 DATA ENGINEER [Kafka/Firehose]: Analytics passivo 'Taxa de Recorrência' emitido p/ Lakehouse: " + kpiPayload);
+        log.info("📊 DATA ENGINEER [Kafka/Firehose]: Analytics passivo 'Taxa de Recorrência' emitido p/ Lakehouse: {}", kpiPayload);
     }
 }

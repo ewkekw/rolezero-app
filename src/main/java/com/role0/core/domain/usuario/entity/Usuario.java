@@ -10,20 +10,28 @@ import com.role0.core.domain.usuario.exception.UsuarioDomainException;
 public class Usuario {
 
     private final UUID id;
-    private String nome;
+    private String nomeDisplay;
+    private double trustScore;
     private Set<VibeTag> vibeTags;
     private boolean biometriaValidada;
     private String tokenVerificacaoBiometrica;
 
-    public Usuario(UUID id, String nome) {
+    public Usuario(UUID id, String nomeDisplay) {
         if (id == null)
             throw new UsuarioDomainException("ID do usuário é obrigatório");
-        if (nome == null || nome.isBlank())
+        if (nomeDisplay == null || nomeDisplay.isBlank())
             throw new UsuarioDomainException("Nome do usuário é obrigatório");
         this.id = id;
-        this.nome = nome;
+        this.nomeDisplay = nomeDisplay;
         this.vibeTags = new HashSet<>();
         this.biometriaValidada = false;
+    }
+
+    public void mudarNome(String novoNome) {
+        if (novoNome == null || novoNome.isBlank()) {
+            throw new UsuarioDomainException("Novo nome de exibição não pode ser vazio.");
+        }
+        this.nomeDisplay = novoNome.trim();
     }
 
     public void adicionarVibeTag(VibeTag tag) {
@@ -67,7 +75,15 @@ public class Usuario {
         return id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getNomeDisplay() {
+        return nomeDisplay;
+    }
+
+    public double getTrustScore() {
+        return trustScore;
+    }
+
+    public void setTrustScore(double trustScore) {
+        this.trustScore = trustScore;
     }
 }
