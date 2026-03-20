@@ -15,7 +15,7 @@ import com.role0.config.AppIntegrationsProperties;
 
 @Configuration
 @EnableWebSecurity
-@EnableConfigurationProperties(AppIntegrationsProperties.class)
+@EnableConfigurationProperties({AppIntegrationsProperties.class, JwtProperties.class})
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -42,8 +42,9 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/swagger-resources/**",
-                    "/webjars/**"
-                ).permitAll() // Libera Swagger UI e endpoints públicos de auth
+                    "/webjars/**",
+                    "/actuator/**"
+                ).permitAll() // Libera Swagger UI, Actuator e endpoints públicos de auth
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/events/**").permitAll()
                 .anyRequest().authenticated()
             )
