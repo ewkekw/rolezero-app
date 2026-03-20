@@ -8,7 +8,11 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 
-@SpringBootApplication(exclude = {org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration.class})
+@SpringBootApplication(exclude = {
+    org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
+})
 @EnableCaching
 @EnableAsync // Habilita processamento paralelo (combinado com Virtual Threads via property)
 @EnableJpaRepositories(basePackages = "com.role0.adapter.out.persistence.repository")

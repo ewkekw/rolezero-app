@@ -37,14 +37,9 @@ spring:
     open-in-view: false
     show-sql: false
 
-  # Cache (Redis opcional — se REDIS_URL não definida, usa in-memory via CacheConfig)
-  data:
-    redis:
-      url: "${REDIS_URL:}"
-      timeout: 2000ms
-      connect-timeout: 2000ms
+  # Cache (Usando simple/in-memory, Redis desativado via Application.java)
   cache:
-    type: "${CACHE_TYPE:redis}"
+    type: "${CACHE_TYPE:simple}"
 
   # Mensageria / EDA (RabbitMQ opcional)
   autoconfigure:
